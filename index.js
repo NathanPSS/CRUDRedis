@@ -14,3 +14,4 @@ app.listen(port, ()=>{
 const db = require('./database/database');
 
 app.post('/pontos', db.addPonto);
+app.post('/getPonto', db.getPonto);

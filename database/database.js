@@ -9,14 +9,17 @@ const client = new Client({
     password: process.env.PG_PASSWORD
 });
 
+
 client.connect()
     .then(()=> console.log('Conectado!'))
     .catch(err => console.log(err.stack));
 
 const addPonto = (request, response) =>{
-    const {nome, lat, lng} = request.body;
+    const {nome,descricao,valor,avaliacao, lat, lng} = request.body;
+    
+    let id=Math.floor(Math.random() * 65536)
 
-    const query = `INSERT INTO ponto (nome, localizacao) VALUES ('${nome}', ST_GeomFromText('POINT(${lat} ${lng})'))`;
+    const query = `INSERT INTO locais_de_encontro (id,nome,descricao,valor,avaliacao, localizacao) VALUES ('${id}','${nome}','${descricao}','${valor}','${avaliacao}', ST_GeomFromText('POINT(${lat} ${lng})'))`;
 
     client.query(query,(error, results) => {
             if(error){
@@ -27,7 +30,21 @@ const addPonto = (request, response) =>{
             response.status(200).send('Inserido');
         });
 };
+const getPonto = (request, response) =>{
+    const {nome} = request.body;
 
+    const query = `SELECT id,nome,descricao,valor,avaliacao, ST_AsText (localizacao) AS localizacao from locais_de_encontro where nome='${nome}'`;
+
+    client.query(query,(error, results) => {
+            if(error){
+                response.status(400).send(error);
+                console.log(error);
+                return;
+            }
+            return response.status(200).json(results.rows);
+        });
+};
 module.exports = {
-    addPonto
+    addPonto,
+    getPonto
 };
